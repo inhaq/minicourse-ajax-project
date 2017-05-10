@@ -33,11 +33,38 @@ function loadData() {
             for (var i = 0; i < articles.length; i++) {
                 var article = articles[i];
                 $nytElem.append("<li class='articles'>" + "<a href='"+article.web_url+"'>" +article.headline.main+"</a>"+ "<p>"+ article.snippet +"</p>" + "</li>");
-            }
-        }
-    );
+            };
+        }).fail(function(e){
+            $nytHeaderElem.text("Api has problems");
+        })
 
-    return false;
+        // WikiPedia API
+        var wikiUrl = "http://en.wikipedia.org/w/api.php?action=opensearch&search="+ cityStr + "&format=json&callback=wikiCallback";
+        var wikiRequestTimeout = setTimeout(function () {
+            $wikiElem.text("Failed to get wiki resources");
+        }, 5000);
+
+        $.ajax({
+            url: wikiUrl,
+            dataType: "jsonp",
+            jsonp: "callback",
+            success: function (response) {
+                var articleList = response[1];
+
+                for (var i = 0; i < articleList.length; i++) {
+                    articleStr = articleList[i];
+                    var url = "http://en.wikipedia.org/wiki/" + articleStr;
+                    $wikiElem.append("<li><a href='"+ url + "'>" + articleStr+ "</a></li>");
+                };
+                clearTimeout(wikiRequestTimeout);
+            }
+        });
+
+
+
+
+
+     return false;
 };
 
 $('#form-container').submit(loadData);
